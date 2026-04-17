@@ -1,8 +1,16 @@
+<p align="center">
+  <img src="assets/Claude-Music-cover.png" alt="claude-music — AI music production for Claude Code" width="720">
+</p>
+
 # claude-music
 
 AI music production skill for [Claude Code](https://claude.ai/code), powered by [ACE-Step 1.5](https://github.com/ace-step/ACE-Step-1.5).
 
 Generate full songs, covers, remixes, and more — just by describing what you want.
+
+<p align="center">
+  <img src="assets/hero.dark.svg" alt="From a text prompt to a full 48 kHz stereo waveform — locally, on your GPU" width="960">
+</p>
 
 ## Quick Start (5 minutes)
 
@@ -86,6 +94,10 @@ The installer handles everything else (Python, FFmpeg, uv, ACE-Step).
 
 ## Quality Presets
 
+<p align="center">
+  <img src="assets/quality-ladder.dark.svg" alt="Four quality presets: draft, standard, high, max — trading off speed for quality" width="720">
+</p>
+
 | Preset | Speed | Best for |
 |--------|-------|----------|
 | `--quality draft` | ~15s | Quick ideas, exploring (4 variants) |
@@ -94,6 +106,10 @@ The installer handles everything else (Python, FFmpeg, uv, ACE-Step).
 | `--quality max` | ~3-5min | Highest quality possible |
 
 ## Commands Reference
+
+<p align="center">
+  <img src="assets/task-icons.dark.svg" alt="Ten sub-commands of claude-music: generate, cover, repaint, compose, analyze, export, enhance, random, library, lora" width="960">
+</p>
 
 ```
 /music generate   — Create music from text + lyrics
@@ -111,6 +127,10 @@ The installer handles everything else (Python, FFmpeg, uv, ACE-Step).
 
 ## How It Works
 
+<p align="center">
+  <img src="assets/pipeline.dark.svg" alt="Four-stage flow: describe, plan, generate, listen — then iterate" width="960">
+</p>
+
 1. You describe what you want (or use `/music generate`)
 2. Claude crafts the right caption, lyrics, and parameters
 3. ACE-Step 1.5 generates the audio locally on your GPU
@@ -119,6 +139,10 @@ The installer handles everything else (Python, FFmpeg, uv, ACE-Step).
 No cloud API. No subscription. Everything runs on your machine.
 
 ## GPU Requirements
+
+<p align="center">
+  <img src="assets/vram-tiers.dark.svg" alt="VRAM tiers: Turbo needs 8 GB (default), Turbo + thinking 14 GB, XL Turbo 16 GB" width="720">
+</p>
 
 | Setup | VRAM | Speed |
 |-------|------|-------|
@@ -137,8 +161,12 @@ Removes skill links only. Your generated music and ACE-Step are untouched.
 
 ## Architecture
 
+<p align="center">
+  <img src="assets/architecture.dark.svg" alt="Orchestrator at the centre, 10 sub-skills around it, music-composer subagent branching off compose" width="960">
+</p>
+
 <details>
-<summary>Click to expand (for developers)</summary>
+<summary>Click to expand file tree (for developers)</summary>
 
 ```
 claude-music/
