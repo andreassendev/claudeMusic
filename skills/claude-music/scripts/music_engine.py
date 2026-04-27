@@ -18,16 +18,13 @@ All structured output is JSON to stdout. Progress/debug info goes to stderr.
 """
 
 import argparse
-import gc
 import json
 import os
-import shutil
 import sys
 import time
 import traceback
 from datetime import datetime
 from pathlib import Path
-
 
 # ---------------------------------------------------------------------------
 # Quality presets
@@ -279,7 +276,7 @@ def cmd_generate(args):
     if handler is None:
         error_json(status)
 
-    from acestep.inference import generate_music, GenerationParams, GenerationConfig
+    from acestep.inference import GenerationConfig, GenerationParams, generate_music
 
     params = GenerationParams(
         caption=args.caption or "",
@@ -391,7 +388,7 @@ def cmd_cover(args):
     if handler is None:
         error_json(status)
 
-    from acestep.inference import generate_music, GenerationParams, GenerationConfig
+    from acestep.inference import GenerationConfig, GenerationParams, generate_music
 
     params = GenerationParams(
         caption=args.caption or "",
@@ -488,7 +485,7 @@ def cmd_repaint(args):
     if handler is None:
         error_json(status)
 
-    from acestep.inference import generate_music, GenerationParams, GenerationConfig
+    from acestep.inference import GenerationConfig, GenerationParams, generate_music
 
     params = GenerationParams(
         caption=args.caption or "",
@@ -588,7 +585,7 @@ def cmd_extract(args):
     if handler is None:
         error_json(status)
 
-    from acestep.inference import generate_music, GenerationParams, GenerationConfig
+    from acestep.inference import GenerationConfig, GenerationParams, generate_music
 
     params = GenerationParams(
         caption=args.caption or "",
@@ -656,7 +653,7 @@ def cmd_lego(args):
     if handler is None:
         error_json(status)
 
-    from acestep.inference import generate_music, GenerationParams, GenerationConfig
+    from acestep.inference import GenerationConfig, GenerationParams, generate_music
 
     params = GenerationParams(
         caption=args.caption or "",
@@ -722,7 +719,7 @@ def cmd_complete(args):
     if handler is None:
         error_json(status)
 
-    from acestep.inference import generate_music, GenerationParams, GenerationConfig
+    from acestep.inference import GenerationConfig, GenerationParams, generate_music
 
     params = GenerationParams(
         caption=args.caption or "",

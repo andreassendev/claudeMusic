@@ -21,7 +21,6 @@ from contextlib import redirect_stdout
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # (a) Quality preset contract
 # ---------------------------------------------------------------------------
@@ -91,9 +90,8 @@ def test_error_json_exits_nonzero_with_json():
     from music_engine import error_json
 
     buf = io.StringIO()
-    with redirect_stdout(buf):
-        with pytest.raises(SystemExit) as exc_info:
-            error_json("test error", suggestion="run --help")
+    with redirect_stdout(buf), pytest.raises(SystemExit) as exc_info:
+        error_json("test error", suggestion="run --help")
 
     assert exc_info.value.code == 1
     parsed = json.loads(buf.getvalue())
@@ -218,8 +216,8 @@ def test_config_defaults_shape(config_json):
 
 def test_no_eval_in_scripts():
     """VULN-001 regression: eval() must not appear in any shell script."""
-    from pathlib import Path as _P
-    scripts = (_P(__file__).resolve().parents[1]
+    from pathlib import Path
+    scripts = (Path(__file__).resolve().parents[1]
                / "skills" / "claude-music" / "scripts")
     for sh in scripts.glob("*.sh"):
         content = sh.read_text()
@@ -232,8 +230,8 @@ def test_no_eval_in_scripts():
 
 def test_export_uses_no_overwrite():
     """VULN-006 regression: ffmpeg must use -n (no-overwrite), not -y."""
-    from pathlib import Path as _P
-    export_sh = (_P(__file__).resolve().parents[1]
+    from pathlib import Path
+    export_sh = (Path(__file__).resolve().parents[1]
                  / "skills" / "claude-music" / "scripts" / "music_export.sh")
     content = export_sh.read_text()
     # Every ffmpeg invocation in export must use -n, not -y

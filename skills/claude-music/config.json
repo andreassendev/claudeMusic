@@ -12,6 +12,8 @@
     "language": "en",
     "offload_to_cpu": true,
     "offload_dit_to_cpu": true,
-    "use_flash_attention": true
-  }
+    "use_flash_attention": false,
+    "bf16": false
+  },
+  "platform": "auto"
 }
