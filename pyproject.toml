@@ -20,6 +20,12 @@ classifiers = [
 # The skill scripts have no pip-installable runtime deps beyond Python stdlib.
 dependencies = []
 
+[tool.setuptools]
+# This repo is a Claude Code skill, not a distributable Python package.
+# Disable package auto-discovery so `pip install -e .` works for installing
+# dev tools (pytest, ruff) without setuptools trying to package assets/skills/research dirs.
+py-modules = []
+
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",
