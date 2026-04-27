@@ -105,8 +105,11 @@ def get_free_vram_mb():
             return int(free / (1024 * 1024))
         if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
             # Apple Silicon: unified memory — report system free RAM as proxy
-            import psutil  # noqa
-            return int(psutil.virtual_memory().available / (1024 * 1024))
+            try:
+                import psutil
+                return int(psutil.virtual_memory().available / (1024 * 1024))
+            except ImportError:
+                return -1
     except Exception:
         pass
     return -1
