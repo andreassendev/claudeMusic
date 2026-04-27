@@ -57,15 +57,24 @@ else
     exit 1
 fi
 
-# Check NVIDIA GPU
+# Detect platform: Apple Silicon (MPS), NVIDIA (CUDA), or CPU-only
+PLATFORM="cpu"
 if command -v nvidia-smi &>/dev/null; then
     GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits 2>/dev/null | head -1)
     GPU_VRAM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
     print_ok "GPU: $GPU_NAME (${GPU_VRAM}MB VRAM)"
+    PLATFORM="cuda"
+elif [[ "$(uname -s)" == "Darwin" ]] && [[ "$(uname -m)" == "arm64" ]]; then
+    CHIP=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "Apple Silicon")
+    UNIFIED_RAM_GB=$(( $(sysctl -n hw.memsize 2>/dev/null) / 1024 / 1024 / 1024 ))
+    print_ok "Apple Silicon detected: $CHIP (${UNIFIED_RAM_GB}GB unified memory)"
+    print_ok "Using Metal Performance Shaders (MPS) backend"
+    PLATFORM="mps"
 else
-    print_warn "No NVIDIA GPU detected. ACE-Step can run on CPU but will be very slow."
-    echo "         For best results, use a system with an NVIDIA GPU (4GB+ VRAM)."
+    print_warn "No GPU detected. ACE-Step will run on CPU (very slow)."
+    echo "         For best results, use NVIDIA GPU (4GB+ VRAM) or Apple Silicon."
 fi
+export CLAUDE_MUSIC_PLATFORM="$PLATFORM"
 
 # Check ffmpeg
 if command -v ffmpeg &>/dev/null; then
@@ -228,18 +237,26 @@ print_step "4/6" "Saving your configuration..."
 
 # Pass the paths via environment variables, NOT string interpolation, so paths
 # containing single quotes or other shell meta-chars don't break the script.
-CONFIG_PATH="$CONFIG" ACE_DIR="$ACE_STEP_DIR" python3 <<'PYEOF'
+CONFIG_PATH="$CONFIG" ACE_DIR="$ACE_STEP_DIR" PLATFORM="$PLATFORM" python3 <<'PYEOF'
 import json, os
 config_path = os.environ["CONFIG_PATH"]
 ace_dir = os.environ["ACE_DIR"]
+platform = os.environ.get("PLATFORM", "cpu")
 with open(config_path) as f:
     config = json.load(f)
 config["ace_step_dir"] = ace_dir
 config["checkpoint_dir"] = os.path.join(ace_dir, "checkpoints")
+config["platform"] = platform
+config.setdefault("defaults", {})
+# Flash attention is CUDA-only — disable on MPS/CPU
+config["defaults"]["use_flash_attention"] = (platform == "cuda")
+# bf16 causes errors on macOS — handled by engine via platform field
+if platform == "mps":
+    config["defaults"]["bf16"] = False
 with open(config_path, "w") as f:
     json.dump(config, f, indent=2)
     f.write("\n")
-print("  config.json updated")
+print(f"  config.json updated (platform={platform})")
 PYEOF
 print_ok "ACE-Step path: $ACE_STEP_DIR"
 print_ok "Output folder: ~/Music/claude-music-output/"

@@ -27,6 +27,7 @@ if ! command -v uv &>/dev/null; then
 fi
 
 # Pre-flight: VRAM check (warn if very low, don't block)
+# Skipped on Apple Silicon — unified memory is shared with system RAM
 if command -v nvidia-smi &>/dev/null; then
     FREE_VRAM=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2>/dev/null | head -1 | xargs)
     if [ -n "$FREE_VRAM" ] && [ "$FREE_VRAM" -lt 4000 ]; then

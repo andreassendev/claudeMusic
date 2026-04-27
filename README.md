@@ -2,11 +2,13 @@
   <img src="assets/Claude-Music-cover.png" alt="claude-music — AI music production for Claude Code" width="720">
 </p>
 
-# claude-music
+# claudeMusic — Apple Silicon edition
 
 AI music production skill for [Claude Code](https://claude.ai/code), powered by [ACE-Step 1.5](https://github.com/ace-step/ACE-Step-1.5).
 
 Generate full songs, covers, remixes, and more — just by describing what you want.
+
+> **This fork** adapts the original [AgriciDaniel/claude-music](https://github.com/AgriciDaniel/claude-music) for **Apple Silicon (M1/M2/M3/M4)** using Metal Performance Shaders (MPS), in addition to NVIDIA CUDA. All credit for the architecture and skill design goes to the original author.
 
 <p align="center">
   <img src="assets/hero.dark.svg" alt="From a text prompt to a full 48 kHz stereo waveform — locally, on your GPU" width="960">
@@ -21,8 +23,8 @@ Generate full songs, covers, remixes, and more — just by describing what you w
 Open a terminal and paste:
 
 ```bash
-git clone https://github.com/AgriciDaniel/claude-music.git
-cd claude-music
+git clone https://github.com/andreassendev/claudeMusic.git
+cd claudeMusic
 ```
 
 ### Step 2: Run the installer
@@ -76,8 +78,10 @@ Or use the command directly:
 ## Requirements
 
 - **Claude Code** — [Get it here](https://claude.ai/code) (CLI, Desktop, or VS Code extension)
-- **NVIDIA GPU** — 4GB+ VRAM minimum, 8GB+ recommended
-  - No GPU? It works on CPU too, just much slower
+- **GPU** (one of):
+  - **Apple Silicon** (M1/M2/M3/M4) — uses Metal Performance Shaders (MPS). 16GB+ unified memory recommended.
+  - **NVIDIA GPU** — 4GB+ VRAM minimum, 8GB+ recommended
+  - No GPU? Works on CPU, just much slower
 - **Storage** — ~10GB free (for ACE-Step + AI models)
 
 The installer handles everything else (Python, FFmpeg, uv, ACE-Step).

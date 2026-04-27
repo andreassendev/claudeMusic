@@ -82,6 +82,19 @@ def log(msg):
     print(msg, file=sys.stderr, flush=True)
 
 
+def detect_platform():
+    """Detect compute platform: cuda, mps (Apple Silicon), or cpu."""
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return "cuda"
+        if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            return "mps"
+    except Exception:
+        pass
+    return "cpu"
+
+
 def get_free_vram_mb():
     """Return free VRAM in MB, or -1 if not available."""
     try:
@@ -90,6 +103,10 @@ def get_free_vram_mb():
             torch.cuda.empty_cache()
             free, total = torch.cuda.mem_get_info()
             return int(free / (1024 * 1024))
+        if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            # Apple Silicon: unified memory — report system free RAM as proxy
+            import psutil  # noqa
+            return int(psutil.virtual_memory().available / (1024 * 1024))
     except Exception:
         pass
     return -1
@@ -159,6 +176,21 @@ def initialize_acestep(args):
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
     os.environ["TORCHAUDIO_USE_BACKEND"] = "ffmpeg"
 
+    platform = detect_platform()
+    # Flash attention is CUDA-only — disable on MPS/CPU
+    use_flash = (platform == "cuda")
+    # On Apple Silicon, MPS handles offload differently — keep CPU offload off
+    offload = (platform == "cuda")
+
+    if platform == "mps":
+        # Avoid bf16 on macOS (ACE-Step docs warn about errors)
+        os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+        log("Using Apple Silicon (MPS) backend")
+    elif platform == "cuda":
+        log("Using NVIDIA CUDA backend")
+    else:
+        log("Using CPU backend (will be slow)")
+
     from acestep.handler import AceStepHandler
     log(f"Loading DiT model: {args.model}...")
 
@@ -168,9 +200,9 @@ def initialize_acestep(args):
         project_root=str(project_root),
         config_path=args.model,
         device="auto",
-        use_flash_attention=True,
-        offload_to_cpu=True,
-        offload_dit_to_cpu=True,
+        use_flash_attention=use_flash,
+        offload_to_cpu=offload,
+        offload_dit_to_cpu=offload,
     )
 
     if not success:
@@ -181,6 +213,9 @@ def initialize_acestep(args):
 
     llm_handler = None
     if args.lm_model and args.thinking:
+        if platform == "mps":
+            log("LM thinking mode not supported on Apple Silicon yet — skipping")
+            return handler, None, status
         log(f"Loading LM: {args.lm_model}...")
         t1 = time.time()
         try:
@@ -195,12 +230,13 @@ def initialize_acestep(args):
                 backend = "pt"
                 log("vllm not available, using PyTorch backend for LM")
 
+            lm_device = "cuda" if platform == "cuda" else "cpu"
             lm_status, lm_success = llm_handler.initialize(
                 checkpoint_dir=str(project_root / "checkpoints"),
                 lm_model_path=args.lm_model,
                 backend=backend,
-                device="cuda",
-                offload_to_cpu=True,
+                device=lm_device,
+                offload_to_cpu=offload,
             )
             if not lm_success:
                 log(f"LM init failed: {lm_status}, continuing without thinking mode")
