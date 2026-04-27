@@ -9,8 +9,9 @@ when_to_use: >
   track, cover/remix/repaint/edit audio, write lyrics, compose, analyze BPM/key,
   export for Spotify/TikTok, master audio, train a LoRA, or mentions ACE-Step.
 compatibility: >
-  Requires ACE-Step 1.5 installed locally + NVIDIA GPU with ≥4 GB VRAM
-  (≥12 GB recommended). Path configured in skills/claude-music/config.json.
+  Requires ACE-Step 1.5 installed locally + GPU acceleration. Supports NVIDIA CUDA
+  (≥4 GB VRAM, ≥12 GB recommended) and Apple Silicon via MPS (M1/M2/M3/M4, 16 GB+
+  unified memory recommended). Path configured in skills/claude-music/config.json.
 allowed-tools:
   - Bash
   - Read
@@ -115,8 +116,9 @@ After any generation:
 | `high` | turbo | 1.7B LM | 8 | ~25s | Better lyrics/structure, thinking mode |
 | `max` | base | 1.7B LM | 65 | ~3-5min | Highest quality, single output |
 
-## VRAM Management (RTX 5070 Ti — 16GB)
+## Memory Management
 
+### NVIDIA CUDA (VRAM)
 | Configuration | VRAM | Offload | Notes |
 |---------------|------|---------|-------|
 | Turbo (no LM) | ~8GB | CPU offload | Default, fast generation |
@@ -124,7 +126,14 @@ After any generation:
 | Turbo + 1.7B LM | ~14GB | CPU + DiT offload | Full thinking, tight on VRAM |
 | XL Turbo | ~14-16GB | Full offload | Maximum quality DiT, no LM room |
 
-**Rule**: Never run two heavy models simultaneously. The music_engine.py handles VRAM automatically.
+### Apple Silicon (Unified Memory)
+| Configuration | RAM needed | Notes |
+|---------------|------------|-------|
+| Turbo (no LM) | 8GB+ | Default — works on 16GB Macs |
+| Turbo + thinking | not yet supported | LM thinking mode is CUDA-only for now |
+| XL Turbo | 24GB+ | Best on 32GB+ Macs |
+
+**Rule**: Never run two heavy models simultaneously. The music_engine.py handles platform detection automatically (CUDA / MPS / CPU).
 
 ## Script Invocation
 
