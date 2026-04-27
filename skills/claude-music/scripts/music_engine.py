@@ -179,13 +179,16 @@ def initialize_acestep(args):
     platform = detect_platform()
     # Flash attention is CUDA-only — disable on MPS/CPU
     use_flash = (platform == "cuda")
-    # On Apple Silicon, MPS handles offload differently — keep CPU offload off
-    offload = (platform == "cuda")
+    # CPU offload helps fit large models on both CUDA and MPS systems
+    offload = (platform in ("cuda", "mps"))
 
     if platform == "mps":
         # Avoid bf16 on macOS (ACE-Step docs warn about errors)
         os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
-        log("Using Apple Silicon (MPS) backend")
+        # Allow MPS to use full unified memory (Apple Silicon doesn't have
+        # the same hard VRAM cap as discrete GPUs)
+        os.environ.setdefault("PYTORCH_MPS_HIGH_WATERMARK_RATIO", "0.0")
+        log("Using Apple Silicon (MPS) backend with CPU offload")
     elif platform == "cuda":
         log("Using NVIDIA CUDA backend")
     else:
