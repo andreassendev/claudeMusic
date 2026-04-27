@@ -54,9 +54,12 @@ done
 
 if command -v nvidia-smi &>/dev/null; then
     GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits 2>/dev/null | head -1 | xargs)
-    RESULTS+=("{\"name\":\"nvidia-gpu\",\"installed\":true,\"version\":\"$GPU_NAME\",\"required\":true}")
+    RESULTS+=("{\"name\":\"gpu\",\"installed\":true,\"backend\":\"cuda\",\"version\":\"$GPU_NAME\",\"required\":true}")
+elif [[ "$(uname -s)" == "Darwin" ]] && [[ "$(uname -m)" == "arm64" ]]; then
+    CHIP=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "Apple Silicon")
+    RESULTS+=("{\"name\":\"gpu\",\"installed\":true,\"backend\":\"mps\",\"version\":\"$CHIP\",\"required\":true}")
 else
-    RESULTS+=("{\"name\":\"nvidia-gpu\",\"installed\":false,\"install\":\"Install NVIDIA drivers\",\"required\":true}")
+    RESULTS+=("{\"name\":\"gpu\",\"installed\":false,\"backend\":\"cpu\",\"install\":\"Install NVIDIA drivers or use Apple Silicon Mac\",\"required\":false}")
 fi
 
 mkdir -p "$HOME/Music/claude-music-output" 2>/dev/null

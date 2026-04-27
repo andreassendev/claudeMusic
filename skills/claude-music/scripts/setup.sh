@@ -31,9 +31,13 @@ command -v jq &>/dev/null && echo "[OK] jq found" || echo "WARNING: jq not found
 if command -v nvidia-smi &>/dev/null; then
     GPU=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits 2>/dev/null | head -1)
     VRAM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
-    echo "[OK] GPU: $GPU (${VRAM}MB VRAM)"
+    echo "[OK] GPU: $GPU (${VRAM}MB VRAM, CUDA backend)"
+elif [[ "$(uname -s)" == "Darwin" ]] && [[ "$(uname -m)" == "arm64" ]]; then
+    CHIP=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "Apple Silicon")
+    RAM_GB=$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))
+    echo "[OK] GPU: $CHIP (${RAM_GB}GB unified memory, MPS backend)"
 else
-    echo "WARNING: nvidia-smi not found"
+    echo "WARNING: No GPU detected (no NVIDIA, no Apple Silicon) — CPU mode will be slow"
 fi
 
 echo ""
